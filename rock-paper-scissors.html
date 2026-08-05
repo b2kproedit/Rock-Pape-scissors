@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rock, Paper, Scissors</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&display=swap');
+
+  :root {
+    --paper: #EFE6D2;
+    --paper-dark: #E4D8BC;
+    --ink: #2B2B28;
+    --ink-soft: #55524a;
+    --red: #B8441F;
+    --blue: #2F5C8A;
+    --green: #4C7A4C;
+    --line: rgba(43,43,40,0.15);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--paper);
+    font-family: 'Kalam', cursive;
+    color: var(--ink);
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image:
+      repeating-linear-gradient(var(--line) 0 1px, transparent 1px 34px);
+    background-position: 0 90px;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: 560px;
+    background: var(--paper);
+    border-radius: 3px;
+    padding: 32px 30px 26px;
+    position: relative;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05), 0 20px 40px -20px rgba(43,43,40,0.35);
+  }
+
+  /* torn top edge */
+  .sheet::before {
+    content: "";
+    position: absolute;
+    top: -8px; left: 0; right: 0; height: 14px;
+    background:
+      linear-gradient(135deg, var(--paper) 25%, transparent 25%) 0 0/16px 16px,
+      linear-gradient(225deg, var(--paper) 25%, transparent 25%) 0 0/16px 16px;
+    background-color: transparent;
+  }
+
+  .punch {
+    position: absolute;
+    top: 14px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #00000022, #0000 60%), var(--paper);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+  }
+  .punch.left { left: 22px; }
+  .punch.right { right: 22px; }
+
+  header {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 44px;
+    margin: 6px 0 0;
+    color: var(--ink);
+    transform: rotate(-1deg);
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin: 2px 0 20px;
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 10px 6px 16px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 22px;
+  }
+
+  .score-block { text-align: center; flex: 1; }
+  .score-block .label {
+    font-size: 17px;
+    color: var(--ink-soft);
+    letter-spacing: 0.5px;
+  }
+  .score-block.you .label { color: var(--blue); }
+  .score-block.cpu .label { color: var(--red); }
+
+  .tally {
+    min-height: 26px;
+    font-size: 22px;
+    line-height: 1;
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+  .tally .you-mark { color: var(--blue); }
+  .tally .cpu-mark { color: var(--red); }
+
+  .vs {
+    font-family: 'Caveat', cursive;
+    font-size: 26px;
+    color: var(--ink-soft);
+    padding: 0 12px 4px;
+  }
+
+  .arena {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    min-height: 108px;
+    margin-bottom: 8px;
+  }
+
+  .pick-slot {
+    width: 92px; height: 92px;
+    border: 2px dashed var(--line);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .pick-slot svg { width: 56px; height: 56px; }
+  .pick-slot.you svg { color: var(--blue); }
+  .pick-slot.cpu svg { color: var(--red); }
+
+  .pick-slot .tag {
+    position: absolute;
+    bottom: -22px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .bang {
+    font-family: 'Caveat', cursive;
+    font-size: 30px;
+    color: var(--ink-soft);
+  }
+
+  .result-line {
+    text-align: center;
+    font-family: 'Caveat', cursive;
+    font-size: 28px;
+    min-height: 40px;
+    margin: 18px 0 6px;
+    color: var(--ink);
+  }
+  .result-line.win { color: var(--green); }
+  .result-line.lose { color: var(--red); }
+  .result-line.tie { color: var(--ink-soft); }
+
+  .choices {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 18px;
+  }
+
+  .choice-btn {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    border: 2.5px solid var(--ink);
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    padding: 0;
+  }
+
+  .choice-btn svg { width: 42px; height: 42px; color: var(--ink); pointer-events: none; }
+
+  .choice-btn:hover {
+    transform: translateY(-4px) rotate(-2deg);
+    box-shadow: 3px 5px 0 var(--ink);
+    background: var(--paper-dark);
+  }
+  .choice-btn:active { transform: translateY(-1px) rotate(0deg); box-shadow: 1px 2px 0 var(--ink); }
+  .choice-btn:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+  .choice-btn.disabled { pointer-events: none; opacity: 0.5; }
+
+  footer {
+    text-align: center;
+    margin-top: 22px;
+  }
+
+  .reset-btn {
+    font-family: 'Kalam', cursive;
+    font-size: 15px;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    border-bottom: 1px dashed var(--ink-soft);
+    cursor: pointer;
+    padding: 2px 0;
+  }
+  .reset-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .choice-btn { transition: none; }
+  }
+
+  @media (max-width: 420px) {
+    .arena { gap: 10px; }
+    .pick-slot { width: 76px; height: 76px; }
+    .choice-btn { width: 70px; height: 70px; }
+    h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="punch left"></div>
+  <div class="punch right"></div>
+
+  <header>
+    <h1>Rock, Paper, Scissors</h1>
+    <div class="subtitle">best two out of three? or just keep going.</div>
+  </header>
+
+  <div class="scoreboard">
+    <div class="score-block you">
+      <div class="label">You</div>
+      <div class="tally" id="youTally"></div>
+    </div>
+    <div class="vs">vs</div>
+    <div class="score-block cpu">
+      <div class="label">Computer</div>
+      <div class="tally" id="cpuTally"></div>
+    </div>
+  </div>
+
+  <div class="arena">
+    <div class="pick-slot you">
+      <svg id="youIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"></svg>
+      <span class="tag">you</span>
+    </div>
+    <div class="bang">✦</div>
+    <div class="pick-slot cpu">
+      <svg id="cpuIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"></svg>
+      <span class="tag">cpu</span>
+    </div>
+  </div>
+
+  <div class="result-line" id="resultLine">Pick one to start &nbsp;↓</div>
+
+  <div class="choices">
+    <button class="choice-btn" data-choice="rock" aria-label="Rock"></button>
+    <button class="choice-btn" data-choice="paper" aria-label="Paper"></button>
+    <button class="choice-btn" data-choice="scissors" aria-label="Scissors"></button>
+  </div>
+
+  <footer>
+    <button class="reset-btn" id="resetBtn">reset score</button>
+  </footer>
+</div>
+
+<script>
+  const ICONS = {
+    rock: '<circle cx="12" cy="13" r="7.2"/><path d="M7 9.5c1-1.6 2.4-2.4 5-2.4" stroke-linecap="round"/>',
+    paper: '<rect x="6" y="4" width="12" height="16" rx="1.2"/><path d="M9 9h6M9 12.5h6M9 16h4" stroke-linecap="round"/>',
+    scissors: '<circle cx="7" cy="6.5" r="2.3"/><circle cx="7" cy="17.5" r="2.3"/><path d="M8.6 8L19 18M8.6 16L19 6" stroke-linecap="round"/>'
+  };
+
+  const LABELS = { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' };
+  const BEATS = { rock: 'scissors', paper: 'rock', scissors: 'paper' };
+
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">${ICONS[btn.dataset.choice]}</svg>`;
+  });
+
+  const youIcon = document.getElementById('youIcon');
+  const cpuIcon = document.getElementById('cpuIcon');
+  const resultLine = document.getElementById('resultLine');
+  const youTallyEl = document.getElementById('youTally');
+  const cpuTallyEl = document.getElementById('cpuTally');
+  const buttons = document.querySelectorAll('.choice-btn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let youScore = 0;
+  let cpuScore = 0;
+  let busy = false;
+
+  function tallyMarks(n, cls) {
+    // groups of 5: |||| with a slash through, drawn as unicode-ish groups
+    let out = '';
+    const full = Math.floor(n / 5);
+    const rem = n % 5;
+    for (let i = 0; i < full; i++) {
+      out += `<span class="${cls}" style="margin-right:6px">####/</span>`;
+    }
+    if (rem > 0) out += `<span class="${cls}">${'|'.repeat(rem)}</span>`;
+    if (n === 0) out += `<span class="${cls}" style="opacity:.35">—</span>`;
+    return out;
+  }
+
+  function renderScores() {
+    youTallyEl.innerHTML = tallyMarks(youScore, 'you-mark');
+    cpuTallyEl.innerHTML = tallyMarks(cpuScore, 'cpu-mark');
+  }
+
+  function setIcon(el, choice) {
+    el.innerHTML = ICONS[choice];
+  }
+
+  function clearIcons() {
+    youIcon.innerHTML = '';
+    cpuIcon.innerHTML = '';
+  }
+
+  function play(choice) {
+    if (busy) return;
+    busy = true;
+    buttons.forEach(b => b.classList.add('disabled'));
+
+    const options = Object.keys(ICONS);
+    const cpuChoice = options[Math.floor(Math.random() * options.length)];
+
+    // quick "thinking" flicker on cpu slot before reveal
+    let ticks = 0;
+    resultLine.className = 'result-line';
+    resultLine.textContent = 'Rock… paper… scissors…';
+    const flicker = setInterval(() => {
+      setIcon(cpuIcon, options[Math.floor(Math.random() * options.length)]);
+      ticks++;
+      if (ticks > 5) {
+        clearInterval(flicker);
+        reveal(choice, cpuChoice);
+      }
+    }, 90);
+
+    setIcon(youIcon, choice);
+  }
+
+  function reveal(choice, cpuChoice) {
+    setIcon(cpuIcon, cpuChoice);
+
+    let outcome; // 'win' | 'lose' | 'tie'
+    if (choice === cpuChoice) {
+      outcome = 'tie';
+    } else if (BEATS[choice] === cpuChoice) {
+      outcome = 'win';
+    } else {
+      outcome = 'lose';
+    }
+
+    if (outcome === 'win') {
+      youScore++;
+      resultLine.textContent = `${LABELS[choice]} beats ${LABELS[cpuChoice]} — you win this round!`;
+    } else if (outcome === 'lose') {
+      cpuScore++;
+      resultLine.textContent = `${LABELS[cpuChoice]} beats ${LABELS[choice]} — computer takes it.`;
+    } else {
+      resultLine.textContent = `Both picked ${LABELS[choice]} — a tie, go again.`;
+    }
+    resultLine.classList.add(outcome);
+    renderScores();
+
+    busy = false;
+    buttons.forEach(b => b.classList.remove('disabled'));
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => play(btn.dataset.choice));
+  });
+
+  resetBtn.addEventListener('click', () => {
+    youScore = 0;
+    cpuScore = 0;
+    renderScores();
+    clearIcons();
+    resultLine.className = 'result-line';
+    resultLine.textContent = 'Pick one to start  ↓';
+  });
+
+  renderScores();
+</script>
+
+</body>
+</html>
