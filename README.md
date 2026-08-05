@@ -20,3 +20,6 @@ One day at a time.
 💬 Comment "Day 4 🔥" to remind me to keep going tomorrow!
 If you've ever wanted to learn web development, follow my 40 Days • 40 Projects journey. Let's grow together! 🚀
 #Day3 #RockPaperScissors #40DaysChallenge #BuildInPublic #HTML #CSS #JavaScript #WebDeveloper #Frontend #Coding #Programming #GitHub #Tech #LearningJourney #DeveloperLife
+
+
+<img width="1868" height="800" alt="Screenshot 2026-08-05 174522" src="https://github.com/user-attachments/assets/c5cbe668-88dd-4caa-9f69-8be50f0b64d0" />
